@@ -1,2 +1,2 @@
-# webassembly-inspector
-webassembly-inspector placeholder
+# wasm-inspector
+wasm-inspector placeholder
