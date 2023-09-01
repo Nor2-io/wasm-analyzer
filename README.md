@@ -1,2 +1,2 @@
-# wasm-inspector
-wasm-inspector placeholder
+# wasm-analyzer
+wasm-analyzer placeholder
