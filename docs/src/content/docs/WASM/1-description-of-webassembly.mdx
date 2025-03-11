@@ -1,0 +1,76 @@
+---
+title: "A short description of WebAssembly"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing WebAssembly"
+---
+
+[WebAssembly.org](https://webassembly.org/) defines WebAssembly, or `Wasm`, as a:
+
+> [...] binary instruction format for a stack-based virtual machine. Wasm is designed as a portable compilation target for programming languages, enabling deployment on the web for client and server applications.
+
+Wasm provides an open standard for running code written in several programming languages on a web client or web server. A Wasm file contains binary code, compiled from languages like C++ or Rust, and many others. Currently, Wasm implementations exist for over 60 languages. Most of these implementations are actively maintained, and more keep coming.
+
+<br />
+
+:::note[Supported languages]
+
+You can read more about supported languages in appcypher's _Awesome WebAssembly Languages_ list on github, [here](https://github.com/appcypher/awesome-wasm-langs).
+
+:::
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## WebAssembly files
+
+<br />
+
+The creation of a Wasm file can be summarized as follows:
+
+- Firstly, you write the code, the same as you would when creating any program.
+- Secondly, you compile the code into a Wasm _module_ (read more about modules in the *Modules* section of our WebAssembly documentation, [here](/wasm/concepts-and-features/2-modules)).
+
+As you might imagine: when you have everything set up, getting started with WebAssembly isn't hard.
+
+<br />
+
+Now, all you've got to do is to use the file, or maybe publish it for others to use. In order to use a Wasm file from a host language, you'll need a little bit of code to instatiate a Wasm module or component–WebAssembly wasn't designed to replace other programming languages, but rather to complement and add functionality to other code. So, typically you'll need a bit of code glue to:
+
+- Firstly, load the module.
+- Secondly, create an instance of the module.
+- Thirdly, use the _exports_ of the module, like callable functions.
+
+<br />
+
+Now, it's worth noting that because of the highly flexible and powerful nature of WebAssembly, people keep finding new applications for it. So, Wasm has found its way into places that don't match the typical web-centric use cases Wasm is usually used for (see, for instance, [Wasmtime](/wasm/concepts-and-features/5-wasmtime)).
+
+<br />
+
+Because of the ever expanding list of possible uses for Wasm, something called the _WebAssembly component model_ was created, the purpose of which is to add another layer, the _component_, that provides a way of using Wasm in more contexts, with a standardized interface. You can find out more about components in the *Component Model* section of our documentation, [here](/wasm/concepts-and-features/4-component-model)
+
+<br/>
+
+<br />
+
+---
+
+<br />
+
+## Important WebAssembly concepts
+
+<br />
+
+- WebAssembly code is organised into _modules_, contained within _.wasm_ files.
+- A module is divided into several possible _known sections_, dedicated to different kind of functionality.
+- Modules may also contain "custom sections". Custom sections aren't standardized, and they may contain all sorts of information, like debugging information, or metadata.
+- The WebAssembly component model adds another layer on top of the WebAssembly module. Turning a WebAssembly module into a component is one way of making Webassembly code usable in languages like C++ or Rust.
+- The Wasm Interface Type (WIT) text format complements the WebAssembly component model. It provides language agnostic interface definitions to be used between programming languages.
+- Wasmtime is a WebAssembly engine that makes WebAssembly code usable in many programming languages.

@@ -1,0 +1,45 @@
+---
+title: "Types"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing WebAssembly types"
+---
+
+WebAssembly supports the following types:
+
+| type      | explanation                                                                                                         |
+| --------- | ------------------------------------------------------------------------------------------------------------------- |
+| externref | External object reference; references to objects owned by the host language                                         |
+| f32       | 32-bit floating point data                                                                                          |
+| f64       | 64-bit floating point data                                                                                          |
+| funcref   | Function reference                                                                                                  |
+| i32       | 32-bit integer, interpretation as signed/unsigned depending on context                                              |
+| i64       | 62-bit integer, interpretation as signed/unsigned depending on context                                              |
+| v128      | 128-bit number vector: Does not distinguish between floating point or integer data, nor signed or unsigned integers |
+
+<br />
+
+The above types can be further divided into overlapping categories:
+
+| type category | explanation    | members                                                                                                      |
+| ------------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
+| numtype       | Numeric values | `i32` \| `i64` \| `f32` \| `f64`                                                                             |
+| reftype       | References     | `externref` \| `funcref`                                                                                     |
+| valtype       | Value types    | `numtype` \| `reftype`\| `vectype` or `externref` \| `funcref` \| `i32` \| `i64` \| `f32` \| `f64` \| `v128` |
+| vectype       | Vectors        | `v128`                                                                                                       |
+
+<br />
+
+In addition, the following typings exist:
+
+| type or type category | explanation                                                     | defined as                                             |
+| --------------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
+| externtype            | Classification for imports and external values                  | `functype` \| `globaltype` \| `memtype` \| `tabletype` |
+| functype              | Function signatures                                             | `resulttype` → `resulttype`                            |
+| globaltype            | Mutable or immutable globally accessible valtypes               | _mutable_ `valtype` \| _immutable_ `valtype`           |
+| limits                | Size ranges for linear memories                                 | object: \{min: `u32`, _optional_ max: `u32`\}          |
+| memtype               | Classification for linear memories                              | `limits`                                               |
+| resulttype            | Classification for the results of functions or instruction sets | vector, sequence of `valtype`                          |
+| tabletype             | Classification for Wasm Tables                                  | `limits` + a `reftype`                                 |

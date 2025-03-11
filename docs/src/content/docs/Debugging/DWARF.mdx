@@ -1,0 +1,153 @@
+---
+title: "DWARF debugging information"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "A overview of the DWARF debugging format."
+---
+
+DWARF debugging information has been available in WebAssembly files for some time now, and this information is of course readily accessible in our [_WASM Analyzer_](/).
+
+Read on to find out a little bit more about DWARF, and how to place DWARF debugging information in your WebAssembly files.
+
+<br />
+
+## Intended audience
+
+This article is written for developers, solutions architects and others working with the technical side of WebAssembly.
+
+<br />
+
+Before reading this, it is recommended that you have some familiarity with WebAssembly, and, specifically, custom sections.
+
+But, should you be unfamiliar with these concepts you'll find our own WebAssembly overview, [here](/wasm/1-description-of-webassembly). Furthermore, **Mozilla**’s excellent WebAssembly docs are available [here](https://developer.mozilla.org/en-US/docs/WebAssembly), and you can also have a look at the **WebAssembly Community Group**'s documentation on custom sections, [here](https://webassembly.github.io/spec/core/appendix/custom.html).
+
+<br />
+
+## Purpose
+
+This document aims to give you a brief look into how DWARF debugging information is structured and added into WebAssembly files. It is instended as a companion piece to our documentation about WebAssembly, [here](/wasm/), and the WASM Analyzer, which you can read about [here](/).
+
+<br />
+
+## This article does not delve deeply into the following:
+
+- general DWARF information
+- DWARF background information
+- WebAssembly
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## On DWARF
+
+<br />
+
+DWARF is a file format that is used by many compilers and debuggers. It is a standardized debugging format that has been around for a long time. You can read more about the DWARF format on the DWARF Debugging Standard Website, [here](https://dwarfstd.org/). At the time this text is written, DWARF 5 is the current latest version, and you can read about it on the version 5 section on the DWARF Debugging Standard Website, [here](https://dwarfstd.org/dwarf5std.html).
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## WebAssembly and DWARF
+
+<br />
+
+In WebAssembly, DWARF debugging information can be automatically added to WebAssembly files by certain tool chains or tools that support adding DWARF debugging information to a binary, like the [rustc](https://rustc-dev-guide.rust-lang.org/overview.html) compiler. Other tools, like the Sentry [wasm-split](https://docs.sentry.io/platforms/native/guides/wasm/) tool allow for splitting out DWARF debugging information into its own file, so that developers can use DWARF information to debug a certain build, and then deliver the same build without included DWARF information. When DWARF data is added or linked to a WebAssembly file, it creates opportunities for faster, or more detailed, debugging. As of now, the utility of using DWARF with WebAssembly is somewhat limited, but some support for WebAssembly DWARF debugging already exists in applications like Google Chrome, which you can read about in the chrome dev blog, [here](https://developer.chrome.com/blog/faster-wasm-debugging/) and [here](https://developer.chrome.com/blog/wasm-debugging-2020/).
+
+<br />
+
+<br />
+
+### **DWARF in custom sections**
+
+WebAssembly custom sections used for DWARF information are named to match DWARF sections. Like the code in WebAssembly itself, DWARF information is divided into sections fulfilling various purposes.
+
+The core information used in DWARF is a set of Debugging Information Entries (DIEs), used to create a low level representation of a program. A DIE contains an ID tag, and a set of attributes. One or more entries describe entities in the program. The DIEs reside in the sections debug_info or debug_info.dwo.
+
+<br />
+
+The following table describes all possible DWARF sections as of version 5:
+
+<br />
+
+| name                              | contains                                                 | explanation                                                                                              | notes                  |
+| --------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `.debug_abbrev`                   | `abbreviation codes`                                     | `Abbreviation codes used in .debug_info section`                                                         |                        |
+| `.debug_abbrev.dwo`<sup>1</sup>   | `abbreviation codes`                                     | `Abbreviation codes used in .debug_info.dwo section`                                                     | `DWARF v5 and up`      |
+| `.debug_addr`                     | `relocated addresses`                                    | `References to loadable sections`                                                                        | `DWARF v5 and up`      |
+| `.debug_aranges`                  | `ranges`                                                 | `Lookup table for mapping addresses to compilation units`                                                |                        |
+| `.debug_frame`                    | `call frame information`                                 | `Call frame information; Stack unwinding information`                                                    |                        |
+| `.debug_info`                     | `Debugging Information Entries (DIEs)`<sup>2</sup>       | `The Core DWARF information section`                                                                     |                        |
+| `.debug_info.dwo`<sup>1</sup>     | `Debugging Information Entries (DIEs)`<sup>2</sup>       | `Contains complete compilation unit debug information`                                                   | `DWARF v5 and up`      |
+| `.debug_line`                     | `line numbers`                                           | `Describes mapping from PC values to source locations.`                                                  |                        |
+| `.debug_line.dwo`<sup>1</sup>     | `line numbers`                                           | `Describes mapping from PC values to source locations.`                                                  | `DWARF v5 and up`      |
+| `.debug_loc`                      | `variable locations`                                     | `Location lists for DW_AT_location attributes`                                                           |                        |
+| `.debug_loclists.dwo`<sup>1</sup> | `variable locations`                                     | `Location lists for DW_AT_location attributes`                                                           | `DWARF v5 and up`      |
+| `.debug_macinfo`                  | `macro information`                                      | `Contains macro information in an older format`                                                          |                        |
+| `.debug_macro.dwo`<sup>1</sup>    | `macro information`                                      | `Contains macro information in a more efficient format`                                                  | `DWARF v5 and up`      |
+| `.debug_names`                    | `names of objects and functions, with types`             | `Lookup table for global objects, functions and types`                                                   |                        |
+| `.debug_pubnames`                 | `names of objects and functions`                         | `Lookup table for global objects and functions`                                                          | `not part of DWARF v5` |
+| `.debug_pubtypes`                 | `an index for type names`                                | `Lookup table for types`                                                                                 | `not part of DWARF v5` |
+| `.debug_ranges`                   | `ranges`                                                 | `Range lists defining what code belongs to which subprograms and compilation units`                      |                        |
+| `.debug_rnglists`                 | `ranges`                                                 | `Range lists defining what code belongs to which subprograms and compilation units in an updated format` | `DWARF v5 and up`      |
+| `.debug_str`                      | `debug strings`                                          | `Contains strings used by sections such as .debug_info`                                                  |                        |
+| `.debug_str_offsets`              | `string offsets`                                         | `Contains relative offsets into the .debug_str section`                                                  |                        |
+| `.debug_types`                    | `type definitions, in the form of type DIEs`<sup>2</sup> | `Contains definitions for large types`                                                                   | `not part of DWARF v5` |
+
+<br />
+
+<sup>1</sup>Used for DWARF 5 split DWARF compilation. Split DWARF facilitates
+faster and more efficient building by splitting off debug information so that it
+can be skipped by a linker (the program that links together the raw object files
+a compiler creates).
+
+<sup>2</sup>A Debugging Information Entry (DIE) has an identification tag and
+key value pair attributes. A DIE represents something with an identifier in
+code, like variables, functions, type, procedures, and so on. A DIE can also
+have subordinate nested DIEs, representing a tree structure.
+
+<br />
+
+WebAssembly file may also have a custom section called _external_debug_info_. If this section exists, it can either contain DWARF debug info, or point to an external file through a UTC-8 encoded URL. The point of having DWARF information in an external file is to speed up network transfers.
+
+You can read more about WebAssembly and DWARF in the DWARF for WebAssembly documentation on GitHub, [here](https://yurydelendik.github.io/webassembly-dwarf/).
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Summary
+
+<br />
+
+DWARF is a well-established debugging information format.
+
+In WebAssembly, DWARF information can be added as custom sections. Each custom section should be named after its equivalent DWARF section. Another option is to add a custom section called _external_debug_info_.DWARF debugging information can either be put in the _external_debug_info_ section, or the section can contain a reference or link to an external file containing DWARF debugging information.
+
+<br />
+
+### **Sources and additional reading**
+
+- Wikipedia's article on DWARF: https://en.wikipedia.org/wiki/DWARF
+- Introduction to the DWARF debugging format: https://dwarfstd.org/doc/Debugging%20using%20DWARF-2012.pdf
+- The DWARF Debugging Standard Website: https://dwarfstd.org/
+- The DWARF Debugging Standard Website, on DWARF 5: https://dwarfstd.org/dwarf5std.html
+- The DWARF for WebAssembly documentation on github: https://yurydelendik.github.io/webassembly-dwarf/
+
+- [Nor<sup>2</sup> on _WebAssembly_](/wasm/)
+- [Nor<sup>2</sup> on the _WASM Analyzer_](/)

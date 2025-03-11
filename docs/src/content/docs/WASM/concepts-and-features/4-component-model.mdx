@@ -1,0 +1,38 @@
+---
+title: "The WebAssembly Component Model"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Short description of the WebAssembly Component Model"
+---
+
+The _WebAssembly component model_ is intended to make Wasm usable outside of a browser. The idea is to add a component layer that makes underlying Wasm functionality accessible in languages like C++ and Rust. The component model is part of the _WebAssembly System interface_ (WASI) project.
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Components
+
+<br />
+
+Wasm _components_ are kind of like stateless executable files, wrapping one or more modules. From the outside, a component may appear to be a Wasm module in its own right, containing one or more subordinated modules. A component is defined using the _Wasm Interface Type_ (WIT) text format, which you can read more about in our document on the subject, [here](/wasm/concepts-and-features/5-wit).
+
+<br/>
+
+<br/>
+
+---
+
+<br />
+
+## Additional reading
+
+<br />
+
+Read more about the WebAssembly component model on github, [here](https://github.com/WebAssembly/component-model).

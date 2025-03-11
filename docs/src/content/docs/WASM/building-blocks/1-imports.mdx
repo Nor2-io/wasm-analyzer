@@ -1,0 +1,94 @@
+---
+title: "Imports"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing WebAssembly imports"
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+
+In WebAssembly terms, _Imports_ are the external _functions_, _tables_, _memories_ and _globals_ a Wasm module or component requires. In order to use an instance of the specific Wasm module or component, it is necessary to pass the various entities listed under this tab to an instance of the module or component.
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Examples
+
+<br />
+
+Passing imports into a Wasm module from might look something like this:
+
+<Tabs>
+  <TabItem label="JavaScript">
+    ```js
+    // Creating an object with references to the imports specified in the WebAssembly file.
+    const importsObject = {
+      imports: {
+        imported_function: aFunction,
+        imported_table: aTable,
+        imported_memory: aMemory,
+        imported_global: aGlobal,
+      },
+    };
+
+    // Fetching and instantiating a module or object from the WebAssembly file.
+    WebAssembly.instantiateStreaming(
+      fetch("moduleOrComponent.wasm"),
+      importsObject
+    ).then((result) => {
+      // Process result
+    });
+    ```
+  </TabItem>
+  <TabItem label="Rust, with Wasmtime">
+    ```rust
+    fn main() -> Result<(), Box<dyn Error>> {
+        let engine = Engine::default();
+        let mut store = Store::new(&engine, ());
+        let module = Module::from_file(&engine, "moduleOrComponent.wasm")?;
+
+        // We'll use a linker for linking functions and globals to instance.
+        let mut linker = Linker::new(&engine);
+
+        linker.func_wrap("", "imported_function", a_function)?;
+        linker.define(&store, "", "imported_global", a_global)?;
+
+        // Passing memory and global into instance constructor
+        let instance = Instance::new(&mut store, &module, &[memory.into(), table.into()])?;
+
+        // Linker will match named imports to existing linked functions and globals.
+        linker.instance(&mut store, "anInstance", instance)?;
+
+        // code to use instance goes here
+
+        Ok(())
+    }
+
+    ```
+  </TabItem>
+</Tabs>
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Additional reading
+
+<br />
+
+
+For further information about the Imports concept, have a look at [_Mozilla_'s documentation](https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Module/imports) on the subject.
+
+You can also read about how Wasm imports are displayed in the Nor<sup>2</sup> Wasm Inspector in the [Imports page section](/core-wasm/imports) of our WASM Analyzer documentation.

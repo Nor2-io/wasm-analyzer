@@ -1,0 +1,30 @@
+---
+title: "Custom Sections"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing WebAssembly custom sections"
+---
+
+_Custom Sections_ differ from the _known_ sections described in previous segments of this documentation in that they aren't part of the WebAssembly standard. Custom sections may vary from module to module, and a specific custom section may be unique to a single module.
+
+<br />
+
+## Example
+
+A typical use case for a custom section is to use it as a means of adding information to code in one of the known sections. An example of a custom section is the _Name_ section that was first defined in the WebAssembly minimum viable product. The Name section was used to attach printable names to items defined in other sections in the module. Other use cases might be the addition of debugging information to a given Wasm file, or meta data pertaining to the origins of a module.
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Additional reading
+
+<br />
+
+You can read more about one kind of debugging information in Wasm files in our DWARF document, which you can find [here](/debugging/dwarf).

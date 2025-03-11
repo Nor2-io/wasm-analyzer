@@ -1,0 +1,527 @@
+---
+title: "Upcoming Features"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "A list of upcoming features, currently being developed."
+---
+
+The Nor<sup>2</sup> WASM Analyzer is an open source application made for displaying the contents of WebAssembly modules or components. You can read about it in our [WASM Analyzer document](/). Read on for a description of some of our planned upcoming features.
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Intended audience
+
+<br />
+
+This article is written for users of the Nor<sup>2</sup> [WASM Analyzer](/), as well as those of our customers who work with [WebAssembly](/wasm/).
+
+<br />
+
+<br />
+
+## Requirements
+
+<br />
+
+Before reading this, it is recommended that you are familiar with Nor<sup>2</sup>'s WASM Analyzer, which you can read about [here](/).
+
+<br />
+
+<br />
+
+## Purpose
+
+<br />
+
+This document describes upcoming features for Nor<sup>2</sup>'s WASM Analyzer.
+
+<br />
+
+<br />
+
+## This article does not delve deeply into the following:
+
+<br />
+
+- general WebAssembly specifications and concepts
+- general information about the _WASM Analyzer_
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Key points
+
+<br />
+
+Here are some upcoming features for the Nor<sup>2</sup> WASM Analyzer:
+
+- generation of a Software Bill of Materials in several file formats
+- a new Environment Variables tab, letting you view our Nor<sup>2</sup>-specific environment variable custom sections
+- a new Secrets tab, letting you view Nor<sup>2</sup>-specific a _Secrets_ custom section
+- a new WIT inspection tab, letting you view a WIT representation of a given WebAssembly component.
+- a new Dependency Inspection tab, letting you get a view of what dependencies a given WebAssembly file has, and how they are interconnected
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Upcoming features
+
+<br />
+
+In the sections that follow, we'll briefly describe some upcoming features for the Nor<sup>2</sup> WASM Analyzer, and where you'll find them in the user interface. Note
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+### Software Bill of Materials
+
+<br />
+
+The [todo: button?] opens a [todo: modal? interface?] that lets you generate a _Software Bill of Materials_ or SBOM for the current module or component.
+
+[Illustration, SBOM generation]<br/>
+_SBOM generation interface_
+
+<br />
+
+The SBOM can be generated in the following formats:
+
+- SPDX
+- SPDX JSON
+- CYCLONEDX JSON
+- CYCLONEDX XML
+- MARKDOWN
+- PDF
+- CSV
+- PLAIN TEXT
+
+<br />
+
+Once you've selected the format you want, you'll be able to see a preview by [todo: describe flow].
+
+When you're satisfied with your chosen format, all that's left to do is to push the [todo: button?] to generate your SBOM.
+
+<br />
+
+The end result should look something like this:
+
+[Illustration, format 1]
+_SBOM in [format] format_
+
+<br />
+
+[Illustration, format 2]
+_SBOM in [format] format_
+
+<br />
+
+[Illustration, format 3]
+_SBOM in [format] format_
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+### Custom section tabs
+
+<br />
+
+The contents shown under the following tabs are declared in _Custom sections_ within WebAssembly files. Read about Custom sections in our WebAssembly overview, [here](/wasm/building-blocks/7-custom-sections). However, unlike the contents of regular custom sections, the data contained within these sections will receive its own tabs in the WASM Analyzer interface. Read about other tabs in the WASM Analyzer document, [here](/#pages).
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+#### **Environment variables**
+
+<br />
+
+_Environment variables_ are a Nor<sup>2</sup> specific addition to the WebAssembly standard. Environment variables are set inside of a component. You can link an Environment variable to an external Nor<sup>2</sup> **project variable**, or set its value directly inside of the component. If the value for an environment variable is set inside of a component, the value cannot be reused for other components.
+
+<br />
+
+[illustration, WASM Analyzer tabs, Environmental variables tab selected]
+_the WASM Analyzer tabs_
+
+The Environmental variables in the WASM Analyzer interface are a direct representation of the same Nor<sup>2</sup> environmental variables you'll find and use through our upcoming control panel.
+
+<br />
+
+Each Environmental variable looks like this in the WASM Analyzer interface:
+
+[Illustration, Environmental variable, each column marked with a number]
+_a Nor<sup>2</sup> Environmental variable in the WASM Analyzer interface_
+
+<br />
+
+The columns are:
+
+The _Environment variables_ list contains the following columns:
+
+| name                      | purpose                                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| _Name_<sup>1</sup>        | Lists custom section names in `string` format.                                                               |
+| _Description_<sup>2</sup> | Displays optional descriptions for environment variables.                                                    |
+| _Type_<sup>3</sup>        | Displays type. Possible values are `bool` \| `f32` \| `f64` \| `i32` \| `i64` \| `string` \| `u32` \| `u64`. |
+| _Value_<sup>4</sup>       | Displays a set value, if any.                                                                                |
+| _Optional_<sup>5</sup>    | Displays if the environment variables are defined as optional. Possible values are `true` and `false`.       |
+
+<br />
+
+The environment variables list is editable, letting you do the following:
+
+- adding new environment variables
+- editing existing environment variables
+- removing existing environment variables
+
+_Note that once a change is made to the list, it cannot be undone._
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+#### **Secrets**
+
+<br />
+
+_Secrets_ are another Nor<sup>2</sup> specific addition to the WebAssembly standard. Secrets are part of the security features for our Nor<sup>2</sup> product. Secrets are descriptors for such features as passwords or tokens.
+
+<br />
+
+[illustration, WASM Analyzer tabs, Secrets tab selected]
+_the WASM Analyzer tabs_
+
+The Secrets in the WASM Analyzer interface are a direct representation of the same Nor<sup>2</sup> Secrets you'll find and use through our upcoming control panel.
+
+<br />
+
+Secrets look like this in the WASM Analyzer interface:
+
+[Illustration, Secret]
+_a Nor<sup>2</sup> Secret in the WASM Analyzer interface_
+
+<br />
+
+The _Secrets_ list contains the following columns:
+
+| name                      | purpose                                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| _Name_<sup>1</sup>        | Lists custom section names in `string` format.                                                               |
+| _Description_<sup>2</sup> | Displays optional descriptions for secrets.                                                                  |
+| _Type_<sup>3</sup>        | Displays type. Possible values are: `bool` \| `f32` \| `f64` \| `i32` \| `i64` \| `string` \| `u32` \| `u64` |
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+### Inspection tabs
+
+<br />
+
+The contents shown under the following tabs describe the structure of a WebAssembly file.
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+#### **WIT Inspection**
+
+<br />
+
+The WIT text format is part of the WebAssembly component model, which you can read about in the _components_ segment of our main WebAssembly overview, [here](/wasm/). You can also read more about WIT itself in the same documentation, [here](/wasm/concepts-and-features/5-wit). The WIT tab will only be visible if the loaded WebAssembly file contains a component with an embedded WIT definition.
+
+The _WIT_ tab displays WIT definitions for the component.
+
+<br />
+
+Under the WIT tabs, you'll have two options. You can either view the WIT definition for a component as raw text:
+
+[Illustration, WIT definition as raw text]
+_the WIT raw text view_
+
+<br />
+
+...or, you can elect to view the WIT data as a more structured view in a list-based hierarchy format:
+
+[Illustration, WIT list view]
+_the WIT list view_
+
+<br />
+
+The list view is structured as follows:
+
+- List View
+  - World
+    - Name
+    - Functions
+      - Name<sup>1</sup>
+      - Parameters<sup>2</sup>
+      - Result<sup>3</sup>
+    - Resources
+  - Interfaces List
+    - Functions
+      - Name<sup>1</sup>
+      - Parameters<sup>2</sup>
+      - Result<sup>3</sup>
+    - Resources
+      - Constructor
+      - Methods
+        - Name<sup>1</sup>
+        - Parameters<sup>2</sup>
+        - Result<sup>3</sup>
+      - Static Functions
+
+<sup>1</sup> *Name is a text attribute with the name or identifier belonging to a
+`Function` or `Method`.*
+
+<sup>2</sup> *The parameters for a `Function` or `Method` have two attributes:*
+
+| name   | purpose                        |
+| ------ | ------------------------------ |
+| _Name_ | the identifier for a parameter |
+| _Type_ | the type\* of a parameter      |
+
+<br />
+
+<sup>3</sup> *The Result attribute of a `Function` or `Method` is a WIT resulttype\*.*
+
+\* Read more about WIT types in our WebAssembly overview, [here](/wasm/concepts-and-features/5-wit#wit-types).
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+#### Dependency Inspection
+
+<br />
+
+Under this tab you'll find a description of how the dependencies of a WebAssembly module or component are interconnected. You'll find information about whether one dependency is using another, and you'll be able to identify potentially "heavy" dependency chains that could cause slow downs or other performance issues with a given WebAssembly file.
+
+<br />
+
+You'll have the option of viewing dependencies in two views:
+
+[Illustration, list view]
+_the dependency List view_
+
+<br />
+
+[Illustration, tree view]
+_the dependency Tree view_
+
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+##### List view
+
+<br />
+
+The _List_ view is subdivided into two sections:
+
+| name                    | purpose                                             |
+| ----------------------- | --------------------------------------------------- |
+| direct dependencies     | the module or component's direct dependencies       |
+| transitive dependencies | indirect dependencies; dependencies of dependencies |
+
+<br />
+
+[Illustration, direct dependencies]
+_the direct dependency list_
+
+<br />
+
+[Illustration, transitive dependencies]
+_the transitive dependency list_
+
+<br />
+
+Items in the dependency list has the following attributes:
+
+| name             | purpose                                                                        |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Name             | text; the identifier or name of a dependency                                   |
+| Version          | text; the version number or name of a dependency                               |
+| Size             | a text representation of the dependency size, in bytes/kilobytes/megabytes/etc |
+| Dependents Count | a integer; showing the number of dependents a given dependency has             |
+| Dependents       | an expandable list of dependents a given dependency has                        |
+
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+##### Tree view
+
+<br />
+
+The _Tree_ view is a means for viewing the structure or hierarchy of dependencies:
+
+[Illustration, Tree view]
+\*the dependency tree view
+
+<br />
+
+Each dependency in the Tree view shows the following attributes:
+
+| name    | purpose                                          |
+| ------- | ------------------------------------------------ |
+| Name    | text; the identifier or name of a dependency     |
+| Version | text; the version number or name of a dependency |
+
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Summary
+
+<br />
+
+The WASM Analyzer will be expanded with more information and functionality about a given WebAssembly file:
+
+- The _Software Bill of Materials_ (SBOM) functionality will allow you to view and generate a Software Bill of Materials in several formats.
+- The _Environment variables_ tab will show you our Nor<sup>2</sup>-specific Environment variables, which can be used for passing values between our software and a WebAssembly module or component.
+- The _Secrets_ tab will show you a set of definitions for authentication data used between our software and a WebAssembly module or component
+- The _WIT inspection_ tab will show you the WIT definition for a given component, if that component has an embedded WIT definition.
+- The _Dependency inspection_ tab gives you lists of dependencies for a given WebAssembly module or component, and shows you how those dependencies are interconnected.
+
+<br />
+
+### **Additional reading**
+
+- [Nor<sup>2</sup> on _WebAssembly_](/wasm/)
+- [Nor<sup>2</sup> on the _WASM Analyzer_](/)
+- The Nor<sup>2</sup> front page: https://nor2.io/
+
+<br />
+
+<br />
+
+<br />
+
+<br />
+
+<br />
+
+<br />
+
+<br />
+
+<br />
+
+<br />
+
+---
+
+NOTES, not part of finished document:
+
+---
+
+---
+
+---
+
+---
+
+WebAssembly
+
+WIT tab(?)
+
+https://github.com/bytecodealliance/wit-bindgen´
+
+### Modules
+
+In WebAssembly, everything is organized into stateless objects called _modules_. The WebAssembly code that makes up a module is divided into multiple sequential sections. The code is compiled by the browser, and modules are instantiated through the _WebAssembly.Module()_ method.
+
+The following table shows the known possible sections that can be part of a WebAssembly module:
+
+| name       | contents                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| _Code_     | Holds the body of every function listed in the _Function_ section.                               |
+| _Data_     | Declares the data that will be loaded into the _Memory_ section.                                 |
+| _Function_ | Lists all the functions in the module.                                                           |
+| _Global_   | Defines global variables for the module.                                                         |
+| _Import_   | Lists all the imports used by the module.                                                        |
+| _Element_  | Declares the data that will be loaded into the _Table_ section.                                  |
+| _Export_   | Lists all the exports that will be exposed to the host environment from inside the module.       |
+| _Memory_   | Holds the linear memory used by an instance of the module.                                       |
+| _Start_    | Declares the index of a function that is executed as a WebAssembly is instantiated.              |
+| _Table_    | Holds a typed array of references to items that can't be stored as raw bytes in linear memory.   |
+| _Type_     | Lists all signatures for functions the module uses. A signature can be shared between functions. |
+
+In addition to the known sections listed above, a WebAssembly module may also contain one or more _custom sections_ that add non-standard functionality. Custom sections must appear after the _Data_ section in a module. An example of a custom section is the _Name_ section that was first defined in the WebAssembly minimum viable product. The Name section was used to attach printable names to items defined in a module.
+
+### Components
+
+The WebAssembly _component model_ is intended to make WebAssembly usable outside of a browser. The idea is to add a component layer that makes underlying WebAssembly functionality accessible in languages like C++ and Rust. The component model is part of the _WebAssembly System interface_ (WASI) project.
+
+A WebAssembly _component_ is essentially a key-value cache layer, wrapping one or or more modules. From the outside, a component may appear to be a WebAssembly module in its own right, containing one or more subordinated modules. A component is defined using the _WebAssembly Interface Type_ (WIT) text format.
+
+WIT is an interface description language, intended to complement the WebAssembly component model. A WIT interface can be seen as a collection of functions, types and use statements. Like a WebAssembly module, a WIT interface defines exports and imports. You can read more about WIT in the WebAssembly component model repository on Github, [here](https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md).
+
+---
+
+Wasmtime
+
+Wasmtide is a project for using WebAsscreated by the Bytecode alliance. You can find the Wasmtime website, [here](https://wasmtime.dev/).

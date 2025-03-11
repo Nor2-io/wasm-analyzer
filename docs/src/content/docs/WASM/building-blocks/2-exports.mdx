@@ -1,0 +1,95 @@
+---
+title: "Exports"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing WebAssembly exports"
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+
+In WebAssembly terms, _Exports_ are the *functions*, *tables*, *memories* and *globals* a Wasm module or component exposes to external code. Module exports are, essentially, Wrappers, containing the various items that need to be exposed to the host environment. Exports from a component add another layer, working as a glue between Wasm and various programming languages, allowing for one way of using Wasm functions in non-JavaScript contexts.
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Examples
+
+<br />
+
+Accessing exports might look something like this:
+
+<Tabs>
+  <TabItem label="JavaScript">
+    ```js
+    WebAssembly.instantiateStreaming(fetch("moduleOrComponent.wasm")).then(
+      (obj) => {
+        const exported_function = obj.instance.exports.aFunction;
+        const exported_table = obj.instance.exports.aTable;
+        const exported_memory = obj.instance.exports.memory;
+        const exported_global = obj.instance.exports.global;
+
+        // code to use exports goes here
+      }
+    );
+    ```
+  </TabItem>
+  <TabItem label="Rust, with Wasmtime">
+    ```rust
+    use anyhow::Result;
+    use wasmtime::*;
+
+    fn main() -> Result<(), Box<dyn Error>> {
+      let engine = Engine::default();
+      let module = Module::from_file(&engine, "module.wasm")?;
+      let mut store = Store::new(&engine, ());
+      let instance = Instance::new(&mut store, &module, &[])?;
+
+      // setting each export to a variable, with error handling.
+
+      let exported_function = instance.get_func(&mut store, "aFunction")
+        .expect("`testfunc` is not an export");
+
+      let test_table = instance.get_table(&mut store, "table")
+        .ok_or(anyhow::format_err!("failed to find `table` export"))?;
+
+      let test_memory = instance.get_memory(&mut store, "memory")
+        .ok_or(anyhow::format_err!("failed to find `memory` export"))?;
+
+      let test_shared_memory = instance.get_shared_memory(&mut store, "shared_memory")
+        .ok_or(anyhow::format_err!("failed to find `shared_memory` export"))?;
+
+      let test_global = instance.get_global(&mut store, "global")
+        .ok_or(anyhow::format_err!("failed to find `global` export"))?;
+
+      // code to use exports goes here
+
+      Ok(())
+    }
+
+    ```
+  </TabItem>
+</Tabs>
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Additional reading
+
+<br />
+
+Read more about how to use exports in Mozilla's WebAssembly documentation, [here](https://developer.mozilla.org/en-US/docs/WebAssembly/Loading_and_running#running_your_webassembly_code).
+
+You can read about how WebAssembly imports are displayed in the Nor<sup>2</sup> WASM Analyzer in the [Exports page section](/core-wasm/exports) of our WASM Analyzer documentation.

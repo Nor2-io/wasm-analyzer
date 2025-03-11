@@ -1,0 +1,5 @@
+packages:
+  - "./*"
+  - '!./src-tauri/templates/**'
+  - '!./crates/**'
+  - '!./docs/**'

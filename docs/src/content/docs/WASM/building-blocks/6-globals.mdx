@@ -1,0 +1,128 @@
+---
+title: "Globals"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing WebAssembly globals"
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+_Globals_ are global `variables`. These variables can be accessed from both host code and within WebAssembly instances. Globals can be defined as **mutable** or **immutable**. This is done through the `mutable` property, with the possible values `true` or `false`. Globals can be both imported into a module, and exported from one.
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Types
+
+<br />
+
+Global values are WebAssembly.ValueTypes, which can be of the following types:
+
+
+| abbreviation | explanation                             |
+| ------------ | --------------------------------------- |
+| `anyfunc`    | Reference to a function                 |
+| `externref`  | Reference to entity in host environment |
+| `f32`        | 32 bit float                            |
+| `f64`        | 64 bit float                            |
+| `i32`        | 32 bit integer                          |
+| `i64`        | 64 bit integer                          |
+| `v128`       | 128 bit vector                          |
+
+<br />
+
+:::note[WebAssembly types]
+
+If you want to read more about WebAssembly types in general, check out our documentation on the subject, [here](/wasm/concepts-and-features/1-types)!
+
+:::
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Examples:
+
+<br />
+
+Creating a global will look something like this :
+
+<Tabs>
+  <TabItem label="JavaScript">
+    ```js
+    const aGlobal = new WebAssembly.Global({ value: "i32", mutable: true }, aValue);
+    ```
+  </TabItem>
+  <TabItem label="Rust, with Wasmtime">
+    ```rust
+    let engine = Engine::default();
+    let mut store = Store::new(&engine, ());
+    let module = Module::from_file(&engine, "module.wasm")?;
+
+    let global_type = GlobalType::new(ValType::I32, Mutability::Var);
+    let a_global = Global::new(&mut store, global_type, a_value.into())?;
+    ```
+  </TabItem>
+</Tabs>
+
+<br />
+
+<br />
+
+Accessing an exported global will look something like this:
+
+<Tabs>
+  <TabItem label="JavaScript">
+    ```js
+    WebAssembly.instantiateStreaming(
+      fetch("moduleOrComponent.wasm"),
+      importsObject
+    ).then(({ obj }) => {
+      const aGlobalRef = obj.exports.getGlobal(); // getting a reference to an exported modal
+    });
+    ```
+  </TabItem>
+  <TabItem label="Rust, with Wasmtime">
+    ```rust
+    let engine = Engine::default();
+    let mut store = Store::new(&engine, ());
+    let module = Module::from_file(&engine, "module.wasm")?;
+    let instance = Instance::new(&mut store, &module, &[])?;
+
+    let a_global_ref = instance.get_global(&mut store, "a_global").unwrap();
+    ```
+  </TabItem>
+</Tabs>
+
+<br />
+
+:::note[Importing globals]
+
+Check out the [Imports section](/wasm/building-blocks/1-imports) of our documentation for an example of passing imports, like a global, into a module!
+
+:::
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Additional reading
+
+<br />
+
+Read more about about _globals_ and how to work with them in Mozilla's WebAssembly documentation, [here](https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Global).

@@ -1,0 +1,93 @@
+---
+title: "Memories"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing WebAssembly memories"
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+In WebAssembly, a _memory_ is a resizable `ArrayBuffer` or `SharedArrayBuffer`. In other terms, an `ArrayBuffer` represents a binary data buffer, or byte array. A `SharedArrayBuffer` is the same thing as an `ArrayBuffer`, but not transferable between contexts, and set up in a way where it can be used for views in shared memory, unlike an `ArrayBuffer`.
+
+Memories can be both imported into, or exported from, a module (see the [Imports section](/wasm/building-blocks/1-imports) of our documentation for an example of passing imports, like a table, into a module).
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Examples
+
+<br />
+
+Creating a memory can look like this:
+
+<Tabs>
+  <TabItem label="JavaScript">
+    ```js
+    const aMemory = new WebAssembly.Memory({
+      initial: 10, // starting, and minimum number of pages
+      maximum: 100, // maximum number of pages
+    });
+    ```
+  </TabItem>
+  <TabItem label="Rust, with Wasmtime">
+    ```rust
+    const initial = 10;                                   // starting, and minimum number of pages
+    const maximum = Some(100);                            // maximum number of pages, as Option<u32>
+
+    let memory_type = MemoryType::new(initial, maximum);  // setting memory type
+    let memory = Memory::new(&mut store, memory_type)?;   // using memory constructor
+    ```
+  </TabItem>
+</Tabs>
+
+<br />
+
+<br />
+
+Accessing an exported memory looks something like this:
+
+<Tabs>
+  <TabItem label="JavaScript">
+    ```js
+    WebAssembly.instantiateStreaming(fetch("module.wasm")).then((obj) => {
+      const memoryContents = new Uint32Array(obj.instance.exports.memory.buffer); // setting the memory contents to a variable
+      const firstValue = values[0]; // setting the contents from the first position in the memory to a variable
+    });
+    ```
+  </TabItem>
+  <TabItem label="Rust, with Wasmtime">
+    ```rust
+    let engine = Engine::default();
+    let mut store = Store::new(&engine, ());
+    let module = Module::from_file(&engine, "module.wasm")?;
+
+    let memory = instance
+      .get_memory(&mut store, "memory")
+      .ok_or(anyhow::format_err!("failed to find `memory` export"))?;
+
+    const first_value = memory.data(&store)[0];
+
+    ```
+  </TabItem>
+</Tabs>
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Additional reading
+
+<br />
+
+You can read more about `memory` in Mozilla's Wasm documentation [here](https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Memory), read more about `ArrayBuffers` [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer) and `SharedArrayBuffers` [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer).

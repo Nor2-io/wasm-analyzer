@@ -1,0 +1,29 @@
+package nornor:wasm-analyzer@0.1.0;
+
+interface reader {
+    use core-import.{core-imports};
+    use core-export.{core-exports};
+    use types.{wasm-module-type, metadata-information, custom-section};
+
+    resource component {
+        constructor(bytes: list<u8>);
+        get-type: func() -> wasm-module-type;
+        get-module-information: func() -> metadata-information;
+        get-core-imports: func() -> core-imports;
+        get-core-exports: func() -> core-exports;
+        get-custom-sections: func() -> list<custom-section>;
+        get-child-components: func() -> list<component>;
+        get-wit: func() -> option<string>;
+        get-wat: func() -> string;
+    }
+
+
+    resource wasm-reader {
+        constructor(bytes: list<u8>);
+        get-root-component: func() -> component;
+    }
+}
+
+world wasm-analyzer {
+    export reader;
+}

@@ -1,0 +1,206 @@
+
+interface types {
+    record custom-section {
+        name: string,
+        human-size: string,
+        size: u64,
+    }
+
+    record metadata {
+        field: string,
+        version: option<string>,
+    }
+
+    record unkown-field {
+        field: string,
+        metadata: metadata,
+    }
+
+    enum wasm-module-type {
+        core,
+        component,
+        %interface,
+    }
+
+    record metadata-information {
+        name: string,
+        size: u64,
+        human-size: string,
+        sha256: string,
+        languages: list<metadata>,
+        tools: list<metadata>,
+        sdks: list<metadata>,
+        unknow-metadata: list<unkown-field>,
+        num-custom-sections: u32,
+        num-core-imports: u32,
+        num-core-export: u32,
+    }
+
+    variant wasm-type {
+        /// Signed 32 bit integer.
+        i32,
+        /// Signed 64 bit integer.
+        i64,
+        /// Floating point 32 bit integer.
+        %f32,
+        /// Floating point 64 bit integer.
+        %f64,
+        /// A 128 bit number.
+        v128,
+        /// A reference to opaque data in the Wasm instance.
+        ref-type(ref-type),
+        //ExternRef, /* = 128 */
+        //FuncRef,
+    }
+
+    variant ref-type {
+        any,
+        none,
+        no-extern,
+        no-func,
+        eq,
+        struct,
+        array,
+        i31,
+        extern,
+        %func,
+        exn,
+        no-exn,
+        cont,
+        no-cont,
+        indexed(u32),
+    }
+}
+//record component-information {
+//    custom-sections: list<custom-section>,
+//    name: string,
+//    size: u64,
+//    human-size: string,
+//    sha256: string,
+//    imports: imports,
+//    exports: exports,
+//    languages: list<metadata>,
+//    tools: list<metadata>,
+//    sdks: list<metadata>,
+//    unknow-metadata: list<unkown-field>,
+//    //registry-metadata: option<registry-metadata>,
+//    wat: option<string>,
+//    wit: option<string>,
+//    //children: list<ComponentInfo>,
+//}
+//
+//record module-information {
+//    custom-sections: list<custom-section>,
+//    name: string,
+//    size: u64,
+//    human-size: string,
+//    sha256: string,
+//    imports: imports,
+//    exports: exports,
+//    languages: list<metadata>,
+//    tools: list<metadata>,
+//    sdks: list<metadata>,
+//    unknow-metadata: list<unkown-field>,
+//    //registry-metadata: option<registry-metadata>,
+//    wat: option<string>,
+//    wit: option<string>,
+//}
+
+interface core-import {
+    use types.{wasm-type};
+
+    record core-imports {
+        functions: list<function>,
+        tables: list<table>,
+        memories: list<memory>,
+        globals: list<global>,
+    }
+
+    record function {
+        module: string,
+        field: string,
+        index: u32,
+        params: list<wasm-type>,
+        results: list<wasm-type>,
+    }
+
+    record table {
+        module: string,
+        field: string,
+        index: u32,
+        /// The type of data stored in elements of the table.
+        ty: wasm-type,
+        /// The minimum number of elements in the table.
+        minimum: u64,
+        /// The maximum number of elements in the table.
+        maximum: option<u64>,
+    }
+
+    record memory {
+        module: string,
+        field: string,
+        index: u32,
+        minimum-pages: u64,
+        maximum-pages: option<u64>,
+        human-minimum-size: string,
+        human-maximum-size: option<string>,
+        shared: bool,
+        memory64: bool,
+    }
+
+    record global {
+        module: string,
+        field: string,
+        index: u32,
+        ty: wasm-type,
+        mutable: bool,
+    }
+
+}
+
+interface core-export {
+    use types.{wasm-type};
+
+    record core-exports {
+        functions: list<function>,
+        tables: list<table>,
+        memories: list<memory>,
+        globals: list<global>,
+    }
+
+    record function {
+        field: string,
+        index: u32,
+        params: list<wasm-type>,
+        results: list<wasm-type>,
+    }
+
+    record table {
+        field: string,
+        index: u32,
+        /// The type of data stored in elements of the table.
+        ty: wasm-type,
+        /// The minimum number of elements in the table.
+        minimum: u64,
+        /// The maximum number of elements in the table.
+        maximum: option<u64>,
+    }
+
+    record memory {
+        field: string,
+        index: u32,
+        minimum-pages: u64,
+        maximum-pages: option<u64>,
+        human-minimum-size: string,
+        human-maximum-size: option<string>,
+        shared: bool,
+        memory64: bool,
+    }
+
+    record global {
+        field: string,
+        index: u32,
+        ty: wasm-type,
+        mutable: bool,
+    }
+}

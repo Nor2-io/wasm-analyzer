@@ -1,0 +1,51 @@
+[package]
+name = "wasm-analyzer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wit-bindgen-rt = { version = "0.39.0", features = ["bitflags"] }
+#getrandom = { version = "0.3.1" }
+
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.137"
+human_bytes = "0.4.3"
+sha2 = "0.10.8"
+base64 = "0.22.1"
+
+# https://github.com/WebAssembly/binaryen
+#binaryen = "0.12.1"
+# https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wasmparser
+wasmparser = "0.225.0"
+# https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wasm-metadata
+wasm-metadata = "0.225.0"
+# https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wasm-encoder
+wasm-encoder = "0.225.0"
+# https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wit-component
+wit-component = "0.225.0"
+# https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wit-parser
+wit-parser = "0.225.0"
+# https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wasm-compose
+wasm-compose = "0.225.0"
+# https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wasmprinter
+wasmprinter = "0.225.0"
+
+bytes = "1.10.0"
+anyhow = "1.0.95"
+semver = "1.0.25"
+reqwest = { version = "0.12.12", features = ["json"] }
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+codegen-units = 1
+opt-level = "s"
+debug = false
+strip = true
+lto = true
+
+[package.metadata.component]
+package = "component:wasm-analyzer"
+
+[package.metadata.component.dependencies]

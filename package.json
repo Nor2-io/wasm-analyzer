@@ -1,0 +1,46 @@
+{
+  "name": "wasm-analyzer",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite dev",
+    "build": "pnpm build:rust && vite build",
+    "serve": "vite preview",
+    "build:rust": "cargo component build --manifest-path ./crates/wasm-analyzer/Cargo.toml --release --target wasm32-wasip1 && jco transpile crates/wasm-analyzer/target/wasm32-wasip1/release/wasm_analyzer.wasm -o ./src/wa"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "solid-js": "1.9.5",
+    "@solidjs/router": "0.15.3",
+    "@solid-primitives/storage": "4.3.1",
+    "@solid-primitives/upload": "0.1.0",
+    "@solid-primitives/resize-observer": "2.1.0",
+    "@bytecodealliance/preview2-shim": "0.17.2",
+    "localforage": "1.10.0",
+    "dexie": "4.0.11",
+    "vite-plugin-top-level-await": "1.5.0"
+  },
+  "devDependencies": {
+    "@bytecodealliance/jco": "1.10.2",
+    "@bytecodealliance/componentize-js": "0.17.0",
+    "@types/node": "22.13.9",
+    "typescript": "5.8.2",
+    "vite": "6.2.0",
+    "vite-plugin-solid": "2.11.6",
+    "tailwindcss": "3.4.13",
+    "postcss": "8.5.3",
+    "postcss-import": "16.1.0",
+    "autoprefixer": "10.4.20",
+    "ts-node": "10.9.2",
+    "tailwind-merge": "3.0.2",
+    "monaco-editor": "0.52.2",
+    "@tailwindcss/forms": "0.5.10",
+    "solid-markdown": "2.0.14",
+    "remark-gfm": "4.0.1",
+    "remark-mdx": "3.1.0",
+    "remark-parse": "11.0.0",
+    "remark-html": "16.0.1",
+    "rehype-highlight": "7.0.2"
+  }
+}

@@ -1,0 +1,16 @@
+---
+title: "WebAssembly building blocks: Summary"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Summarizing the WebAssembly building blocks documentation"
+---
+
+- A module is divided into several possible _known sections_, dedicated to different kinds of functionality.
+- The *Imports* section contains the external *functions*, *tables*, *memories* and *globals* a Wasm module or component requires.
+- The *Exports* section contains the *functions*, *tables*, *memories* and *globals* a Wasm module or component exposes to external code.
+- _Functions_ in WebAssembly are the same as functions, methods, or subroutines in most programming languages. Functions are defined in the *Functions* section of a WebAssembly Module.
+- WebAssembly *Tables* are similar to arrays of *function* references. A *Table* is defined in the *Table* section of a WebAssembly Module.
+- *Memories* are buffers that are used by WebAssembly code for data storage. *Memories* can be shared. *Memories* are defined in the *Memory* section of a WebAssembly Module.
+- Modules may also contain *Custom Sections*. *Custom Sections* aren't standardized, and they may contain all sorts of information, like debugging information, or metadata.

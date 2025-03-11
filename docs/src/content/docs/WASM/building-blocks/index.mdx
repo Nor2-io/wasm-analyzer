@@ -1,0 +1,61 @@
+---
+title: "Introduction"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing some of the the building blocks in WebAssembly"
+---
+
+In this part of our documentation you'll find more information about some of the various parts that make up the code inside of a *.wasm* file or package, and which are available for review in the Nor<sup>2</sup> WASM Analyzer. 
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Sections
+
+<br/>
+
+The sections of a *.wasm* file or package provide a structure for organizing WebAssembly code. 
+
+<br />
+
+<br />
+
+### Known sections
+
+WebAssembly sections can be *known*. Known sections are predefined parts inside of a *.wasm* file or package, dedicated to a specific purpose. The list of known WebAssembly sections includes, but isn't limited to: 
+
+| section   | decription                                                                                                                                     | related document                                  |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Imports   | Defines functions, tables, memories, and globals the internal code of the WebAssembly file needs access to to function.                        | [**Imports**](/wasm/building-blocks/1-imports)    |
+| Exports   | Defines functions, tables, memories, and globals that are accessible from within the WebAssembly file, and which can be used by external code. | [**Exports**](/wasm/building-blocks//2-exports)   | 
+| Functions | Defines functions within the WebAssembly file.                                                                                                 | [**Functions**](/wasm/building-blocks/3-functions)  |        
+| Tables    | Defines a vector containing function references.                                                                                               | [**Tables**](/wasm/building-blocks/4-tables)     | 
+| Memories  | Defines a buffer used for storing data that can be used by code within the WebAssembly file.                                                   | [**Memories**](/wasm/building-blocks/5-memories)   | 
+| Globals   | Defines a vector containing global variables that may be used by code inside and outside the WebAssembly file.                                 | [**Globals**](/wasm/building-blocks/6-globals)    | 
+
+<br />
+
+<br />
+
+### Custom sections
+
+In addition to the *known* sections of a *.wasm* file or package, there are *Custom Sections*. A custom section doesn't follow a standard like a *known* section does, and it's possible for individual WebAssembly files or packages to have uniquely named custom sections. Custom sections are usually used to fill specific requirements that aren't universal in the same way as those covered by the *known* sections. read more about custom sections, [here](/wasm/building-blocks/7-custom-sections).
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+<br />
+
+Go to the next documents for more information about the WebAssembly building blocks...

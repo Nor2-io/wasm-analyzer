@@ -1,0 +1,60 @@
+---
+title: "Modules"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing WebAssembly modules"
+---
+
+In WebAssembly, everything is organized into stateless objects called _modules_. The Wasm code that makes up a module is divided into multiple sequential sections. The code is compiled by the browser, and modules are instantiated through the _WebAssembly.Module()_ method.
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Sections
+
+<br />
+
+The following table shows the known possible sections that can be part of a Wasm module:
+
+| name           | contents                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------ |
+| _Code_         | Holds the body of every function listed in the _Function_ section.                               |
+| _Data_         | Declares the data that will be loaded into the _Memory_ section.                                 |
+| *Function*\*   | Lists all the functions in the module.                                                           |
+| *Global*\*     | Defines global variables for the module.                                                         |
+| *Import*\*     | Lists all the imports used by the module.                                                        |
+| _Element_      | Declares the data that will be loaded into the _Table_ section.                                  |
+| *Export*\*     | Lists all the exports that will be exposed to the host environment from inside the module.       |
+| *Memory*\*     | Holds the linear memory used by an instance of the module.                                       |
+| _Start_        | Declares the index of a function that is executed as a Wasm module is instantiated.              |
+| *Table*\*      | Holds a typed array of references to items that can't be stored as raw bytes in linear memory.   |
+| _Type_         | Lists all signatures for functions the module uses. A signature can be shared between functions. |
+
+\* _Shown in the [WASM Analyzer](/) interface._
+
+<br/>
+
+In addition to the known sections listed above, a Wasm module may also contain one or more _custom sections_ that add non-standard functionality. Custom sections must appear after the _Data_ section in a module.
+
+Read more about the contents of the various sections, and the building blocks of a module in the [Building blocks section](/wasm/building-blocks/) of this documentation.
+
+<br/>
+
+<br/>
+
+---
+
+<br />
+
+## Additional reading
+
+<br />
+
+Read more about the contents of the various sections contained within a module in our documentation on WebAssembly building blocks, [here](/building-blocks/index).

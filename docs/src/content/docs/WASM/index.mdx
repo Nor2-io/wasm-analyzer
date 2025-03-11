@@ -1,0 +1,54 @@
+---
+title: "WebAssembly (WASM)"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Introduction"
+---
+
+We here at Nor<sup>2</sup> have been using WebAssembly for a while now, and we'll be supporting WebAssembly code on our platform. Read through our documentation for our introduction to WebAssembly and to some aspects of the WebAssembly ecosystem that we find relevant to our own platform.
+
+The documents in this section provide you with a brief overview of the core concepts of WebAssembly, as well as an overview of some important concepts and technologies in the WebAssembly ecosystem. If you're an old hand at WebAssembly and have found yourself reading this document by way of one of our other documents, you can skip or skim our core WebAssembly documentation, and perhaps you should be reading about our [WASM Analyzer](/), instead. However, if you're fairly new to the world of WebAssembly, we encourage you to read on.
+
+<br />
+
+<br />
+
+## On WebAssembly
+
+WebAssembly provides a means to running code written and compiled from a _guest_ language, in a _host_ language. Early versions of WebAssembly were primarily used in a web context, letting developers utilize modules created in various programming languages, with JavaScript client side code. It's a relatively new technology that saw its minimum viable product implementation in 2017. But, as can be seen in the WebAssembly high-level design goals on github from 2015, [here](https://github.com/WebAssembly/design/commit/12ee148fb5cfa33331dbffadae06752b1759a7bf), WebAssembly was also intended for use in non-browser environments. And today, the WebAssembly ecosystem has most certainly expanded into more than just being used for client side applications running in web browsers.
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Intended audience
+
+The documentation in this section is written for developers, solutions architects and others working with the technical side of software development.
+
+<br />
+
+## Requirements
+
+Before reading these documents, it is recommended that you have some familiarity with core programming concepts. Furthermore, code samples are provided in the form of JavaScript and Rust snippets, so having some previous experience with either language is recommended, but not required, for you to understand the gist of this document.
+
+<br />
+
+## Purpose
+
+Our general WebAssembly documents are intended as companion pieces to our WASM Analyzer documentation, [here](/). It is meant to explain the information you can find in a given WebAssembly module or component, as you open it in the WASM Analyzer. That said, if you're new to the WebAssembly ecosystem and just want to read about WebAssembly, feel free to read on.
+
+<br />
+
+## The documents in this section do not delve deeply into the following:
+
+- Detailed WebAssembly specifications
+- Debugging information in custom sections (but see our article about DWARF, [here](/debugging/dwarf))
+- API specifications
+
+We will, however, provide links to further reading for more in-depth looks into the various concepts and features we've written about.

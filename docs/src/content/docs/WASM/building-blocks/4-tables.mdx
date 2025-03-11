@@ -1,0 +1,90 @@
+---
+title: "Tables"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing WebAssembly tables"
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+
+WebAssembly _tables_ are mutable wrapper objects. A table is similar to an array, and contains function references. The contents of a _table_ may be altered from both host code and Wasm.
+
+Wasm tables can both be imports for, and exports from, a Wasm module or component (see the [Imports section](/wasm/building-blocks/1-imports) of our documentation for an example of passing imports, like a function, into a module).
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Examples
+
+<br />
+
+Creating a Wasm table looks like this:
+
+<Tabs>
+  <TabItem label="JavaScript">
+    ```js
+    const aTableDescriptor = {
+      element: "anyfunc", // anyfunc (any function) or externref (external function references)
+      initial: 5, // initial number of items in the Table
+      maximum: 100, // (optional) the maximum number of items the Table is allowed to contain
+    };
+
+    const aTable = new WebAssembly.Table(aTableDescriptor);
+    ```
+  </TabItem>
+  <TabItem label="Rust, with Wasmtime">
+    ```rust
+      let table_type = TableType::new(ValType::FuncRef, 2, None);           // declaring a table type
+      let table = Table::new(&mut store, table_type, Val::FuncRef(None))?;  // creating the table
+    ```
+  </TabItem>
+</Tabs>
+
+<br />
+
+Accessing an exported table might look something like this:
+
+<Tabs>
+  <TabItem label="JavaScript">
+      ```js
+      WebAssembly.instantiateStreaming(fetch("module.wasm")).then((obj) => {
+        const aTable = obj.instance.exports.tbl; // setting table reference to a variable
+        const firstValue = aTable.get(0)(); // getting the first value from the table
+      });
+      ```
+  </TabItem>
+  <TabItem label="Rust, with Wasmtime">
+    ```rust
+    let engine = Engine::default();
+    let mut store = Store::new(&engine, ());
+    let module = Module::from_file(&engine, "module.wasm")?;
+
+    let a_table = instance.get_table(&mut store, "table")
+      .ok_or(anyhow::format_err!("failed to find `table` export"))?; // setting table reference to a variable
+
+    let first_value = let a_table.get(&mut store, 0);                // getting the first value from the table
+    ```
+  </TabItem>
+</Tabs>
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Additional reading
+
+<br />
+
+More information about Wasm _Tables_ can be found in [Mozilla's WebAssembly documentation](https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Table).

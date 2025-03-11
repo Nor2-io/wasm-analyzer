@@ -1,0 +1,870 @@
+---
+title: "WebAssembly (WASM)"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "An overview of WebAssembly."
+---
+
+We here at Nor<sup>2</sup> have been using WebAssembly for a while now, and we'll be supporting WebAssembly code on our platform. So, read on for our introduction to WebAssembly and to some aspects of the WebAssembly ecosystem that we find relevant to our own platform.
+
+This article provides you with a brief overview of the core concepts of WebAssembly, as well as an overview of some important concepts and technologies in the WebAssembly ecosystem. If you're an old hand at WebAssembly and found yourself reading this document by way of one of our other documents, you can skip or skim this article, and perhaps you should read about our [WASM Analyzer](WASM_Analyzer.mdx). However, if you're fairly new to the world of WebAssembly, we encourage you to read on.
+
+<br />
+
+## On WebAssembly
+
+WebAssembly provides a means to running code written and compiled from a _guest_ language, in a _host_ language. Early versions of WebAssembly were primarily used in a web context, letting developers utilize modules created in various programming languages, with JavaScript client side code. It's a relatively new technology that saw its minimum viable product implementation in 2017. But, as can be seen in the WebAssembly high-level design goals on github from 2015, [here](https://github.com/WebAssembly/design/commit/12ee148fb5cfa33331dbffadae06752b1759a7bf), WebAssembly was also intended for use in non-browser environments. And today, the WebAssembly ecosystem has most certainly expanded into more than just being used for client side applications running in web browsers.
+
+<br />
+
+---
+
+<br />
+
+## Intended audience
+
+This article is written for developers, solutions architects and others working with the technical side of software development.
+
+<br />
+
+## Requirements
+
+Before reading this, it is recommended that you have some familiarity with core programming concepts. Furthermore, code samples are provided in the form of JavaScript and Rust snippets, so having some previous experience with either language is recommended but not required for you to understand the gist of this document.
+
+<br />
+
+## Purpose
+
+This document is intended as a companion piece to our article about the WASM Analyzer, [here](WASM_Analyzer.mdx). It is meant to explain the information you can find in a given WebAssembly module or component, as you open it in the WASM Analyzer. That said, if you're new to the WebAssembly ecosystem and just want to read about WebAssembly, feel free to read on.
+
+<br />
+
+## This article does not delve deeply into the following:
+
+- Detailed WebAssembly specifications
+- Debugging information in custom sections (but see our article about DWARF, [here](DWARF.mdx))
+- API specifications
+
+We will, however, provide links to further reading for more in-depth looks into the various concepts and features we've written about.
+
+<br />
+
+---
+
+<br />
+
+## The purpose of WebAssembly
+
+[WebAssembly.org](https://webassembly.org/) defines WebAssembly, or `Wasm`, as a:
+
+> [...] binary instruction format for a stack-based virtual machine. Wasm is designed as a portable compilation target for programming languages, enabling deployment on the web for client and server applications.
+
+Wasm provides an open standard for running code written in several programming languages on a web client or web server. A Wasm file contains binary code, compiled from languages like C++ or Rust, and many others. Currently, Wasm implementations exist for over 60 languages. Most of these implementations are actively maintained, and more keep coming. You can read more about supported languages in appcypher's _Awesome WebAssembly Languages_ list on github, [here](https://github.com/appcypher/awesome-wasm-langs).
+
+<br />
+
+The creation of a Wasm file can be summarized as follows:
+
+- Firstly, you write the code, the same as you would when creating any program.
+- Secondly, you compile the code into a Wasm _module_ (read more about modules, [below](#modules)).
+
+As you might imagine: when you have everything set up, getting started with WebAssembly isn't hard.
+
+<br />
+
+Now, all you've got to do is to use the file, or maybe publish it for others to use. In order to use a Wasm file from a host language, you'll need a little bit of code to instatiate a Wasm module or component–WebAssembly wasn't designed to replace other programming languages, but rather to complement and add functionality to other code. So, typically you'll need a bit of code glue to:
+
+- Firstly, load the module.
+- Secondly, create an instance of the module.
+- Thirdly, use the _exports_ of the module, like callable functions.
+
+Now, it's worth noting that because of the highly flexible and powerful nature of WebAssembly, people keep finding new applications for it. So, Wasm has found its way into places that don't match the typical web-centric use cases Wasm was originally intended for (see, for instance, [Wasmtime](#wasmtime)). And because of this, something called the _WebAssembly component model_ was created, the purpose of which is to add another layer, the _component_, that provides an interface for using Wasm in more contexts, with a standardized interface. You can find out more about components, [below](#components)
+
+<br />
+
+---
+
+<br />
+
+## Some useful WebAssembly concepts
+
+In this section, you'll find a brief overview of some of the building blocks and features of the WebAssembly ecosystem. What's written here isn't meant to make you an expert on Wasm, but rather, it's a brief primer or refresher on some of the basics, intended to help you understand what the Nor<sup>2</sup> [WASM Analyzer](WASM_Analyzer.mdx) shows you.
+
+<br />
+
+---
+
+<br />
+
+### **Modules**
+
+In WebAssembly, everything is organized into stateless objects called _modules_. The Wasm code that makes up a module is divided into multiple sequential sections. The code is compiled by the browser, and modules are instantiated through the _WebAssembly.Module()_ method.
+
+<br />
+
+The following table shows the known possible sections that can be part of a Wasm module:
+
+| name           | contents                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------ |
+| _Code_         | Holds the body of every function listed in the _Function_ section.                               |
+| _Data_         | Declares the data that will be loaded into the _Memory_ section.                                 |
+| \*Function\*\* | Lists all the functions in the module.                                                           |
+| \*Global\*\*   | Defines global variables for the module.                                                         |
+| \*Import\*\*   | Lists all the imports used by the module.                                                        |
+| _Element_      | Declares the data that will be loaded into the _Table_ section.                                  |
+| \*Export\*\*   | Lists all the exports that will be exposed to the host environment from inside the module.       |
+| \*Memory\*\*   | Holds the linear memory used by an instance of the module.                                       |
+| _Start_        | Declares the index of a function that is executed as a Wasm module is instantiated.              |
+| \*Table\*\*    | Holds a typed array of references to items that can't be stored as raw bytes in linear memory.   |
+| _Type_         | Lists all signatures for functions the module uses. A signature can be shared between functions. |
+
+\* _Shown in the [WASM Analyzer](WASM_Analyzer.mdx) interface_
+
+In addition to the known sections listed above, a Wasm module may also contain one or more _custom sections_ that add non-standard functionality. Custom sections must appear after the _Data_ section in a module.
+
+<br />
+
+---
+
+<br />
+
+### **Types**
+
+WebAssembly supports the following types:
+
+| type      | explanation                                                                                                         |
+| --------- | ------------------------------------------------------------------------------------------------------------------- |
+| externref | external object reference; references to objects owned by the host language                                         |
+| f32       | 32-bit floating point data                                                                                          |
+| f64       | 64-bit floating point data                                                                                          |
+| funcref   | function reference                                                                                                  |
+| i32       | 32-bit integer, interpretation as signed/unsigned depending on context                                              |
+| i64       | 62-bit integer, interpretation as signed/unsigned depending on context                                              |
+| v128      | 128-bit number vector: Does not distinguish between floating point or integer data, nor signed or unsigned integers |
+
+<br />
+
+The above types can be further divided into overlapping categories:
+
+| type category | explanation    | members                                                                                                      |
+| ------------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
+| numtype       | numeric values | `i32` \| `i64` \| `f32` \| `f64`                                                                             |
+| reftype       | references     | `externref` \| `funcref`                                                                                     |
+| valtype       | value types    | `numtype` \| `reftype`\| `vectype` or `externref` \| `funcref` \| `i32` \| `i64` \| `f32` \| `f64` \| `v128` |
+| vectype       | vectors        | `v128`                                                                                                       |
+
+<br />
+
+In addition, the following typings exist:
+
+| type or type category | explanation                                                     | defined as                                             |
+| --------------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
+| externtype            | classification for imports and external values                  | `functype` \| `globaltype` \| `memtype` \| `tabletype` |
+| functype              | function signatures                                             | `resulttype` → `resulttype`                            |
+| globaltype            | mutable or immutable globally accessible valtypes               | _mutable_ `valtype` \| _immutable_ `valtype`           |
+| limits                | size ranges for linear memories                                 | object: \{min: `u32`, _optional_ max: `u32`\}          |
+| memtype               | classification for linear memories                              | `limits`                                               |
+| resulttype            | classification for the results of functions or instruction sets | vector, sequence of `valtype`                          |
+| tabletype             | classification for Wasm Tables                                  | `limits` + a `reftype`                                 |
+
+<br />
+
+---
+
+<br />
+
+### **Components**
+
+The _WebAssembly component model_ is intended to make Wasm usable outside of a browser. The idea is to add a component layer that makes underlying Wasm functionality accessible in languages like C++ and Rust. The component model is part of the _WebAssembly System interface_ (WASI) project.
+
+A Wasm _component_ is kind of like a stateless executable file, wrapping one or more modules. From the outside, a component may appear to be a Wasm module in its own right, containing one or more subordinated modules. A component is defined using the _Wasm Interface Type_ (WIT) text format, which you can read more about, [below](#wasm-interface-type-text-format).
+
+Read more about the WebAssembly component model on github, [here](https://github.com/WebAssembly/component-model).
+
+<br />
+
+---
+
+<br />
+
+### **Wasm Interface Type text format**
+
+WIT is an Interface Description Language—a language that facilitates communication between programs or objects created in different languages. IDL definitions are agnostic, or language-independent, working as intermediaries between two or more programming languages.
+
+The WIT format is intended to be legible for humans, and to complement the _WebAssembly component model_. A basic tenet behind WIT is that it should be easy to read and write for developers. The aim of the creators of WIT is to provide a foundation for producing components from guest programming languages. These components should then be usable by host programming languages.
+
+WIT uses the following keywords:
+
+| keyword   | explanation                                                                                                                   |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| export    | Makes an item accessible from host language.                                                                                  |
+| func      | _function_, [read more](#wit-functions)                                                                                       |
+| import    | Defines component requirement; Imports must be passed through constructor when components is instantiated.                    |
+| interface | collection of functions and types, [read more](#wit-interfaces)                                                               |
+| package   | a collection of one or more .wit files, or units of WIT code, with an identifying ID, [read more](#wit-packages)              |
+| static    | [function](#wit-functions) declaration for functions without implicit _self_ parameters                                       |
+| type      | _type_ declaration, [read more](#wit-types)                                                                                   |
+| union     | _variant_ [_type_](#wit-types), where all variant entries have a _type_ payload                                               |
+| use       | Defines import in [interface](#wit-interfaces).                                                                               |
+| variant   | [_type_](#wit-types) containing a list of valid types; An item typed as a variant must match one of the listed variant types. |
+| world     | a collection of exports and/or imports                                                                                        |
+
+<br />
+
+WIT supports a greater range of types than Wasm code. For a list of types, have a look at the [following section](#wit-types).
+
+You can read more about WIT in the WebAssembly component model repository on Github, [here](https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md), or continue on to read our summary of the WIT building blocks.
+
+<br />
+
+<br />
+
+#### **WIT types**
+
+WIT supports the following _types_:
+
+| type    | explanation                                                                             |
+| ------- | --------------------------------------------------------------------------------------- |
+| bool    | boolean                                                                                 |
+| char    | character                                                                               |
+| enum    | enumerator                                                                              |
+| flags   | bitset structure with named bits                                                        |
+| float32 | 32-bit floating point data                                                              |
+| float64 | 64-bit floating point data                                                              |
+| handle  | resource reference, can be `borrowed` or `owned`\*                                      |
+| id      | identifier                                                                              |
+| list    | collection of values                                                                    |
+| option  | option type (encapsulates optional value)                                               |
+| record  | record type (collection with fixed number of values/named fields)                       |
+| result  | result type (holds a return value or error value)                                       |
+| s8      | signed 8-bit integer                                                                    |
+| s16     | signed 16-bit integer                                                                   |
+| s32     | signed 32-bit integer                                                                   |
+| s64     | signed 64-bit integer                                                                   |
+| string  | string                                                                                  |
+| tuple   | tuple (collection with fixed number of (two) values)                                    |
+| u8      | unsigned 8-bit integer                                                                  |
+| u16     | unsigned 16-bit integer                                                                 |
+| u32     | unsigned 32-bit integer                                                                 |
+| u64     | unsigned 64-bit integer                                                                 |
+| union   | union type (compound of several possible types, where all entries have a typed payload) |
+| variant | variant type (compound of several possible types)                                       |
+
+\* An owned handle will call the destructor for the resource it refers to, when dropped. A borrowed handle will not call the destructor.
+
+<br />
+
+<br />
+
+#### **WIT packages**
+
+WIT text, or code, is organized into _packages_. Each package is represented by a directory, containing WIT code separated into files. Valid WIT files have the file ending `.wit`, and should be encoded as UTF-8. WIT packages can contain [_interfaces_](#wit-interfaces) and [_worlds_](#wit-worlds).
+
+Type definitions within a WIT package can be shared between files. Type definitions are most easily shared between files within the same package with a _use_ statement, but types may also be shared between packages, with the addition of an identifying package ID to the use statement.
+
+<br />
+
+Package membership is also defined within a file, in the following format:
+
+```ts
+package local:example
+```
+
+<br />
+
+Now, consider the following type interface, belonging to the previously defined package:
+
+```ts
+package local:example
+
+interface my-types {
+  record a-record {
+    small-number: u32,
+    big-number: u64,
+  }
+
+  record another-record {
+    a-number: u32,
+    another-number: u32,
+  }
+
+  type some-number = u32
+}
+```
+
+<br />
+
+Import the types above within the same package like this:
+
+```ts
+package local:example
+
+interface another-interface {
+  use my-types.{a-record, another-record, some-number}
+}
+```
+
+<br />
+
+Import the same types into a file belonging to another package by adding the package ID to the use statement:
+
+```ts
+package local:another-example
+
+interface another-interface {
+  use local:example/my-types.{a-record, another-record, some-number}
+}
+```
+
+<br />
+
+The examples above include [interface](#wit-interfaces) definitions. Keep reading for more information about these interfaces.
+
+<br />
+
+<br />
+
+#### **WIT interfaces**
+
+WIT is built around the _interface_ format, and interface definitions sit at the top level of WebAssembly components. interface is a collection of functions and types. WIT interfaces make Wasm code available to external code, and work much as a more traditional instance of a Wasm module.
+
+A WIT interface can be seen as a collection of functions, types and use statements. Like a Wasm module, a WIT interface defines exports and imports.
+
+<br />
+
+A WIT interface can be defined as:
+
+```ts
+interface my-interface {
+  // interface contents
+}
+```
+
+<br />
+
+Key features of WIT interfaces:
+
+- functions
+- resources
+- types
+
+<br />
+
+<br />
+
+##### **WIT functions**
+
+In WIT, a function can be defined as:
+
+```ts
+my-function: func(param: string)
+```
+
+<br />
+
+When examining this statement, we find that a function declaration starts off with a label, or _name_:
+
+```ts
+my-function:
+```
+
+<br />
+
+After the label, we have the definition of the function itself. It starts off with the keyword `func`, for "function", and then gets to the definition of parameters:
+
+```ts
+func(param: string)
+```
+
+<br />
+
+Note that parameters are typed, and that the typing used can be either pre-defined types, like _string_ in the example above, or [user-defined types] (#types).
+
+<br />
+
+<br />
+
+##### **WIT resources**
+
+A WIT _resource_ is defined as an entity with a limited lifetime that can only be passed indirectly via handle values. The abstract resource type is used in interfaces for items that shouldn't be copied by value. In WIT, resource statements can look something like:
+
+```ts
+resource my-resource
+```
+
+<br />
+
+But a resource definition can also have a body, which enables statements like:
+
+```ts
+resource my-resource {
+  constructor(init: u32)          // 0-1 constructors per resource
+  some-function: func(param: u32) // a resource definition can contain function definitions
+}
+```
+
+<br />
+
+<br />
+
+##### **WIT worlds**
+
+A WIT world can be said to describe the _type_ of a component, and it sits at the top level of a WebAssembly component. Worlds describe components, and define named imports and exports. Worlds can be structured as either component interfaces, or functions.
+
+<br />
+
+A WIT world can be defined as:
+
+```ts
+world my-world {
+  import local:example/my-types
+  export local:example/my-types
+}
+```
+
+<br />
+
+---
+
+<br />
+
+### **Wasmtime**
+
+Wasmtime is a WebAssembly engine for compiled Wasm modules. The Wasmtime runtime project was created by the [Bytecode alliance](https://bytecodealliance.org/). You can find the Wasmtime website [here](https://wasmtime.dev/).
+
+Wasmtime is available for the following languages:
+
+- C
+- C++
+- Go
+- Python
+- Rust
+
+There's also a Nuget package available for the .Net framework, making Wasmtime available for C# and other .Net languages.
+
+In this document, you'll find code samples written for Rust, using Wasmtime.
+
+<br />
+
+---
+
+<br />
+
+## WebAssembly sections
+
+In this section, you'll find more information about the various _WebAssembly sections_ that are available for review in the Nor<sup>2</sup> WASM Analyzer.
+
+<br />
+
+<br />
+
+### **Imports**
+
+In WebAssembly terms, _Imports_ are the external *functions*, *tables*, *memories* and *globals* a Wasm module or component requires. In order to use an instance of the specific Wasm module or component, it is necessary to pass the various entities listed under this tab to an instance of the module or component.
+
+<br />
+
+Passing imports into a Wasm module from _JavaScript_ might look something like this:
+
+```js
+// Creating an object with references to the imports specified in the WebAssembly file.
+const importsObject = {
+  imports: {
+    imported_function: aFunction,
+    imported_table: aTable,
+    imported_memory: aMemory,
+    imported_global: aGlobal,
+  },
+};
+
+// Fetching and instantiating a module or object from the WebAssembly file.
+WebAssembly.instantiateStreaming(
+  fetch("moduleOrComponent.wasm"),
+  importsObject
+).then((result) => {
+  // Process result
+});
+```
+
+<br />
+
+When using _Wasmtime_ and passing imports from _Rust_, the code might look like this:
+
+```rust
+fn main() -> Result<(), Box<dyn Error>> {
+    let engine = Engine::default();
+    let mut store = Store::new(&engine, ());
+    let module = Module::from_file(&engine, "moduleOrComponent.wasm")?;
+
+    // We'll use a linker for linking functions and globals to instance.
+    let mut linker = Linker::new(&engine);
+
+    linker.func_wrap("", "imported_function", a_function)?;
+    linker.define(&store, "", "imported_global", a_global)?;
+
+    // Passing memory and global into instance constructor
+    let instance = Instance::new(&mut store, &module, &[memory.into(), table.into()])?;
+
+    // Linker will match named imports to existing linked functions and globals.
+    linker.instance(&mut store, "anInstance", instance)?;
+
+    // code to use instance goes here
+
+    Ok(())
+}
+
+```
+
+<br />
+
+For further information about the Imports concept, have a look at [_Mozilla_'s documentation](https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Module/imports) on the subject.
+
+You can read about how Wasm imports are displayed in the Nor<sup>2</sup> Wasm Inspector in the [Imports tab section](WASM_Analyzer.mdx#imports-tab) of our WASM Analyzer article.
+
+<br />
+
+<br />
+
+### **Exports**
+
+In WebAssembly terms, _Exports_ are the *functions*, *tables*, *memories* and *globals* a Wasm module or component exposes to external code. Module exports are, essentially, Wrappers, containing the various items that need to be exposed to the host environment. Exports from a component add another layer, working as a glue between Wasm and various programming languages, allowing for one way of using Wasm functions in non-JavaScript contexts.
+
+<br />
+
+Accessing exports might look something like this:
+
+_JavaScript_:
+
+```js
+WebAssembly.instantiateStreaming(fetch("moduleOrComponent.wasm")).then(
+  (obj) => {
+    const exported_function = obj.instance.exports.aFunction;
+    const exported_table = obj.instance.exports.aTable;
+    const exported_memory = obj.instance.exports.memory;
+    const exported_global = obj.instance.exports.global;
+
+    // code to use exports goes here
+  }
+);
+```
+
+_Rust with Wasmtime_:
+
+```rust
+use anyhow::Result;
+use wasmtime::*;
+
+fn main() -> Result<(), Box<dyn Error>> {
+  let engine = Engine::default();
+  let module = Module::from_file(&engine, "module.wasm")?;
+  let mut store = Store::new(&engine, ());
+  let instance = Instance::new(&mut store, &module, &[])?;
+
+  // setting each export to a variable, with error handling.
+
+  let exported_function = instance.get_func(&mut store, "aFunction")
+    .expect("`testfunc` is not an export");
+
+  let test_table = instance.get_table(&mut store, "table")
+    .ok_or(anyhow::format_err!("failed to find `table` export"))?;
+
+  let test_memory = instance.get_memory(&mut store, "memory")
+    .ok_or(anyhow::format_err!("failed to find `memory` export"))?;
+
+  let test_shared_memory = instance.get_shared_memory(&mut store, "shared_memory")
+    .ok_or(anyhow::format_err!("failed to find `shared_memory` export"))?;
+
+  let test_global = instance.get_global(&mut store, "global")
+    .ok_or(anyhow::format_err!("failed to find `global` export"))?;
+
+  // code to use exports goes here
+
+  Ok(())
+}
+
+```
+
+<br />
+
+Read more about how to use exports in Mozilla's WebAssembly documentation, [here](https://developer.mozilla.org/en-US/docs/WebAssembly/Loading_and_running#running_your_webassembly_code).
+
+You can read about how WebAssembly imports are displayed in the Nor<sup>2</sup> WASM Analyzer in the [Exports tab section](WASM_Analyzer.mdx#exports-tab) of our WASM Analyzer article.
+
+<br />
+
+<br />
+
+### **Functions**
+
+A WebAssembly module or component may have a defined set of one or more imported functions. These functions need to be passed into an instance of the module or component the Wasm file represents. Import functions can be created in code, or passed on from another source, like a specified module. The functions are then passed into a module or component as it is instantiated (see the [Imports section](#imports) above for an example of passing imports, like a function, into a module).
+
+The module or component may also have a set of one or more exported functions. These functions are exported from an instance of the module or component, and made available to the host environment.
+
+Find out more about what Wasm functions represent in [Mozilla's description of key WebAssembly concepts](https://developer.mozilla.org/en-US/docs/WebAssembly/Concepts#webassembly_key_concepts).
+
+<br />
+
+<br />
+
+### **Tables**
+
+WebAssembly _tables_ are mutable wrapper objects. A table is similar to an array, and contains function references. The contents of a _table_ may be altered from both host code and Wasm.
+
+Wasm tables can both be imports for, and exports from, a Wasm module or component (see the [Imports section](#imports) above for an example of passing imports, like a function, into a module).
+
+<br />
+
+Creating a Wasm table looks like this:
+
+_JavaScript_:
+
+```js
+const aTableDescriptor = {
+  element: "anyfunc", // anyfunc (any function) or externref (external function references)
+  initial: 5, // initial number of items in the Table
+  maximum: 100, // (optional) the maximum number of items the Table is allowed to contain
+};
+
+const aTable = new WebAssembly.Table(aTableDescriptor);
+```
+
+_Rust with Wasmtime_:
+
+```rust
+  let table_type = TableType::new(ValType::FuncRef, 2, None);           // declaring a table type
+  let table = Table::new(&mut store, table_type, Val::FuncRef(None))?;  // creating the table
+```
+
+<br />
+
+Accessing an exported table might look something like this:
+
+_JavaScript_:
+
+```js
+WebAssembly.instantiateStreaming(fetch("module.wasm")).then((obj) => {
+  const aTable = obj.instance.exports.tbl; // setting table reference to a variable
+  const firstValue = aTable.get(0)(); // getting the first value from the table
+});
+```
+
+_Rust with Wasmtime_:
+
+```rust
+let engine = Engine::default();
+let mut store = Store::new(&engine, ());
+let module = Module::from_file(&engine, "module.wasm")?;
+
+let a_table = instance.get_table(&mut store, "table")
+  .ok_or(anyhow::format_err!("failed to find `table` export"))?; // setting table reference to a variable
+
+let first_value = let a_table.get(&mut store, 0);                // getting the first value from the table
+```
+
+<br />
+
+The module or component may also have a set of one or more exported functions. These functions are exported from an instance of the module or component, and made available to the host environment.
+
+More information about Wasm _Tables_ can be found in [Mozilla's WebAssembly documentation](https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Table).
+
+<br />
+
+<br />
+
+### **Memories**
+
+In WebAssembly, a _memory_ is a resizable `ArrayBuffer` or `SharedArrayBuffer`. In other terms, an `ArrayBuffer` represents a binary data buffer, or byte array. A `SharedArrayBuffer` is the same thing as an `ArrayBuffer`, but not transferable between contexts, and set up in a way where it can be used for views in shared memory, unlike an `ArrayBuffer`.
+
+Memories can be both imported into, or exported from, a module (see the [Imports section](#imports) above for an example of passing imports, like a table, into a module).
+
+<br />
+
+Creating a memory can look like this:
+
+_JavaScript_:
+
+```js
+const aMemory = new WebAssembly.Memory({
+  initial: 10, // starting, and minimum number of pages
+  maximum: 100, // maximum number of pages
+});
+```
+
+_Rust with Wasmtime_:
+
+```rust
+const initial = 10;                                   // starting, and minimum number of pages
+const maximum = Some(100);                            // maximum number of pages, as Option<u32>
+
+let memory_type = MemoryType::new(initial, maximum);  // setting memory type
+let memory = Memory::new(&mut store, memory_type)?;   // using memory constructor
+```
+
+<br />
+
+Accessing an exported memory looks something like this:
+
+_Javascript_:
+
+```js
+WebAssembly.instantiateStreaming(fetch("module.wasm")).then((obj) => {
+  const memoryContents = new Uint32Array(obj.instance.exports.memory.buffer); // setting the memory contents to a variable
+  const firstValue = values[0]; // setting the contents from the first position in the memory to a variable
+});
+```
+
+_Rust with Wasmtime_:
+
+```rust
+let engine = Engine::default();
+let mut store = Store::new(&engine, ());
+let module = Module::from_file(&engine, "module.wasm")?;
+
+let memory = instance
+  .get_memory(&mut store, "memory")
+  .ok_or(anyhow::format_err!("failed to find `memory` export"))?;
+
+const first_value = memory.data(&store)[0];
+
+```
+
+<br />
+
+You can read more about `memory` in Mozilla's Wasm documentation [here](https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Memory), read more about `ArrayBuffers` [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer) and `SharedArrayBuffers` [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer).
+
+<br />
+
+<br />
+
+### **Globals**
+
+_Globals_ are global `variables`. These variables can be accessed from both host code and within WebAssembly instances. Globals can be defined as **mutable** or **immutable**. This is done through the `mutable` property, with the possible values `true` or `false`. Globals can be both imported into a module, and exported from one.
+
+<br />
+
+Global value are WebAssembly.ValueTypes, and can have the possible typing:
+
+| abbreviation | explanation                             |
+| ------------ | --------------------------------------- |
+| `anyfunc`    | Reference to a function                 |
+| `externref`  | Reference to entity in host environment |
+| `f32`        | 32 bit float                            |
+| `f64`        | 64 bit float                            |
+| `i32`        | 32 bit integer                          |
+| `i64`        | 64 bit integer                          |
+| `v128`       | 128 bit vector                          |
+
+<br />
+
+Creating a global will look something like this (see the [Imports section](#imports) above for an example of passing imports, like a global, into a module):
+
+_JavaScript_:
+
+```js
+const aGlobal = new WebAssembly.Global({ value: "i32", mutable: true }, aValue);
+```
+
+_Rust with Wasmtime_:
+
+```rust
+let engine = Engine::default();
+let mut store = Store::new(&engine, ());
+let module = Module::from_file(&engine, "module.wasm")?;
+
+let global_type = GlobalType::new(ValType::I32, Mutability::Var);
+let a_global = Global::new(&mut store, global_type, a_value.into())?;
+```
+
+<br />
+
+Accessing an exported global will look something like this:
+
+_JavaScript_:
+
+```js
+WebAssembly.instantiateStreaming(
+  fetch("moduleOrComponent.wasm"),
+  importsObject
+).then(({ obj }) => {
+  const aGlobalRef = obj.exports.getGlobal(); // getting a reference to an exported modal
+});
+```
+
+_Rust with Wasmtime_:
+
+```rust
+let engine = Engine::default();
+let mut store = Store::new(&engine, ());
+let module = Module::from_file(&engine, "module.wasm")?;
+let instance = Instance::new(&mut store, &module, &[])?;
+
+let a_global_ref = instance.get_global(&mut store, "a_global").unwrap();
+```
+
+<br />
+
+Read more about about _globals_ and how to work with them in Mozilla's WebAssembly documentation, [here](https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Global).
+
+<br />
+
+<br />
+
+### **Custom sections**
+
+As mentioned before, _custom sections_ differ from the _known_ sections described above in that they aren't part of the WebAssembly standard. Custom sections may vary from module to module, and a specific custom section may be unique to a single module.
+
+A typical use case for a custom section is to use it as a means of adding information to code in one of the known sections. An example of a custom section is the _Name_ section that was first defined in the WebAssembly minimum viable product. The Name section was used to attach printable names to items defined in other sections in the module. Other use cases might be the addition of debugging information to a given Wasm file, or meta data pertaining to the origins of a module.
+
+You can read more about one kind of debugging information in Wasm files in our DWARF document, which you can find [here](DWARF.mdx).
+
+<br />
+
+---
+
+<br />
+
+## Summary
+
+WebAssembly provides a means for running code written in several programming languages on a web client or web server. Code from a given _guest_ language is compiled into a Wasm file, either a module or a component, which can be used by a _host_ language.
+
+Important WebAssembly concepts:
+
+- Wasm code is organized into _modules_, contained within _.wasm_ files.
+- A module is divided into several possible _known sections_, dedicated to different kinds of functionality.
+- Modules may also contain "custom sections". Custom sections aren't standardized, and they may contain all sorts of information, like debugging information, or metadata.
+- The WebAssembly component model adds another layer on top of the Wasm module. Turning a Wasm module into a component is one way of making Wasm code usable from a host language.
+- The Wasm Interface Type (WIT) text format complements the WebAssembly component model. It provides language agnostic interface definitions to be used between programming languages.
+- Wasmtime is a Wasm engine that makes Wasm code usable in many programming languages.
+
+<br />
+
+### **Sources and additional reading**
+
+- Wikipedia's article on WebAssembly: https://en.wikipedia.org/wiki/WebAssembly
+- The WebAssembly high-level goals from 2015 (github): https://github.com/WebAssembly/design/commit/12ee148fb5cfa33331dbffadae06752b1759a7bf
+- The current list of WebAssembly high-level goals on WebAssembly.org: https://webassembly.org/docs/high-level-goals/
+- appcypher's Awesome WebAssembly Languages list on github: https://github.com/appcypher/awesome-wasm-langs
+- The WebAssembly component model documentation on github: https://github.com/WebAssembly/component-model
+- The Wasm Interface Type text format documentation on github: https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md
+- The ByteCode Alliance website: https://bytecodealliance.org/
+- The Wasmtime website: https://wasmtime.dev/
+
+<br />
+
+#### From Mozilla's Webassembly documentation:
+
+- key concepts: https://developer.mozilla.org/en-US/docs/WebAssembly/Concepts#webassembly_key_concepts
+- loading and running WebAssembly code: https://developer.mozilla.org/en-US/docs/WebAssembly/Loading_and_running#running_your_webassembly_code
+- imports: https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Module/imports
+- tables: https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Table
+- memories: https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Memory
+- globals: https://developer.mozilla.org/en-US/docs/WebAssembly/JavaScript_interface/Global
+- array buffer: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer
+- shared array buffer: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
+
+<br />
+
+- [Nor<sup>2</sup> on _DWARF_](DWARF.mdx)
+- [Nor<sup>2</sup> on the _WASM Analyzer_](WASM_Analyzer.mdx)

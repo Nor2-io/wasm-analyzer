@@ -1,0 +1,68 @@
+---
+title: "Functions"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing WebAssembly functions"
+---
+
+Functions in WebAssembly are representations of contained set of tasks or instructions, the same as functions, methods, or subroutines in most programming languages. Functions can have in-parameters, and they can have an output, or just perform a task. For what types of output a WebAssembly function can have, have a look at our documentation on WebAssembly types, [here](/wasm/concepts-and-features/1-types).
+
+<br/>
+
+<br/>
+
+---
+
+<br />
+
+## Function contexts
+
+<br />
+
+Functions used in WebAssembly code aren't always limited to usage within a Webassembly module or component. Some functions are passed to the module or component as *imports*, and some functions are *exports* that can be accessed from the host environment.
+
+You can read more about [Imports](/wasm/building-blocks/1-imports) and [Exports](/wasm/building-blocks/2-exports) in this documentation.
+
+<br />
+
+<br />
+
+### Imports
+
+<br/>
+
+A WebAssembly module or component may have a defined set of one or more imported functions. These functions need to be passed into an instance of the module or component the Wasm file represents. Import functions can be created in code, or passed on from another source, like a specified module. The functions are then passed into a module or component as it is instantiated (see the [Imports document](/wasm/building-blocks/1-imports) mentioned above for an example of passing imports, like a function, into a module).
+
+The module or component may also have a set of one or more exported functions. These functions are exported from an instance of the module or component, and made available to the host environment.
+
+
+<br />
+
+<br />
+
+### Exports
+
+<br />
+
+A module or component may have a set of one or more exported functions. These functions are exported from an instance of the module or component, and made available to the host environment.
+
+<br />
+
+More information about exported Wasm _Functions_ can be found in [Mozilla's WebAssembly documentation](https://developer.mozilla.org/en-US/docs/WebAssembly/Exported_functions).
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## Additional reading
+
+<br />
+
+Find out more about what Wasm functions represent in [Mozilla's description of key WebAssembly concepts](https://developer.mozilla.org/en-US/docs/WebAssembly/Concepts#webassembly_key_concepts).
+

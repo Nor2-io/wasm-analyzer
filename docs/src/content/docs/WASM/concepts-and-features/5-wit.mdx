@@ -1,0 +1,295 @@
+---
+title: "The Wasm Interface Type text format"
+date: 2023-07-12
+lastmod: 2023-07-12
+draft: true
+tags: []
+description: "Describing WIT"
+---
+
+The Wasm Interface Type text format (WIT) is an Interface Description Language (IDL)—a language that facilitates communication between programs or objects created in different languages. IDL definitions are agnostic, or language-independent, working as intermediaries between two or more programming languages.
+
+The WIT format is intended to be legible for humans, and to complement the [_WebAssembly component model_](/wasm/concepts-and-features/4-component-model). A basic tenet behind WIT is that it should be easy to read and write for developers.
+
+The aim of the creators of WIT is to provide a foundation for producing components from guest programming languages. These components should then be usable by host programming languages.
+
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## **Keywords**
+
+<br />
+
+
+WIT uses the following keywords:
+
+| keyword   | explanation                                                                                                                   |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| export    | Makes an item accessible from host language.                                                                                  |
+| func      | _Function_, [read more](#wit-functions)                                                                                       |
+| import    | Defines component requirement; Imports must be passed through constructor when components are instantiated.                   |
+| interface | Collection of functions and types, [read more](#wit-interfaces)                                                               |
+| package   | Collection of one or more .wit files, or units of WIT code, with an identifying ID, [read more](#wit-packages)                |
+| static    | [Function](#wit-functions) declaration for functions without implicit _self_ parameters                                       |
+| type      | _Type_ declaration, [read more](#wit-types)                                                                                   |
+| union     | _Variant_ [_type_](#wit-types), where all variant entries have a _type_ payload                                               |
+| use       | Defines import in [interface](#wit-interfaces).                                                                               |
+| variant   | [_Type_](#wit-types) containing a list of valid types; An item typed as a variant must match one of the listed variant types. |
+| world     | Collection of exports and/or imports                                                                                          |
+
+<br />
+
+WIT supports a greater range of types than Wasm code. For a list of types, have a look at the [following section](#wit-types).
+
+You can read more about WIT in the WebAssembly component model repository on Github, [here](https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md), or continue on to read our summary of the WIT building blocks.
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## **WIT types**
+
+<br />
+
+WIT supports the following predefined _types_:
+
+| type    | explanation                                                                             |
+| ------- | --------------------------------------------------------------------------------------- |
+| bool    | boolean                                                                                 |
+| char    | character                                                                               |
+| enum    | enumerator                                                                              |
+| flags   | bitset structure with named bits                                                        |
+| float32 | 32-bit floating point data                                                              |
+| float64 | 64-bit floating point data                                                              |
+| handle  | resource reference, can be `borrowed` or `owned`\*                                      |
+| id      | identifier                                                                              |
+| list    | collection of values                                                                    |
+| option  | option type (encapsulates optional value)                                               |
+| record  | record type (collection with fixed number of values/named fields)                       |
+| result  | result type (holds a return value or error value)                                       |
+| s8      | signed 8-bit integer                                                                    |
+| s16     | signed 16-bit integer                                                                   |
+| s32     | signed 32-bit integer                                                                   |
+| s64     | signed 64-bit integer                                                                   |
+| string  | string                                                                                  |
+| tuple   | tuple (collection with fixed number of (two) values)                                    |
+| u8      | unsigned 8-bit integer                                                                  |
+| u16     | unsigned 16-bit integer                                                                 |
+| u32     | unsigned 32-bit integer                                                                 |
+| u64     | unsigned 64-bit integer                                                                 |
+| union   | union type (compound of several possible types, where all entries have a typed payload) |
+| variant | variant type (compound of several possible types)                                       |
+
+\* _An owned handle will call the destructor for the resource it refers to, when dropped. A borrowed handle will not call the destructor._
+
+<br />
+
+WIT also allows for user defined types, examples of which can be seen [below](#wit-interface-declaration).
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## **WIT packages**
+
+<br />
+
+WIT text, or code, is organized into _packages_. Each package is represented by a directory, containing WIT code separated into files. WIT packages can contain [_interfaces_](#wit-interfaces) and [_worlds_](#wit-worlds).
+
+Type definitions within a WIT package can be shared between files. Type definitions are most easily shared between files within the same package with a `use` statement, but types may also be shared between packages, with the addition of an identifying *package ID* to the use statement.
+
+Valid WIT package files have the file ending `.wit`, and should be encoded as UTF-8.
+
+<br />
+
+Package membership is also defined within a file, in the following format:
+
+```ts
+package local:example
+```
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## **WIT interface declaration**
+
+<br />
+
+Now, consider the following type interface, belonging to the previously defined package:
+
+```ts
+package local:example
+
+interface my-types {
+  record a-record {
+    small-number: u32,
+    big-number: u64,
+  }
+
+  record another-record {
+    a-number: u32,
+    another-number: u32,
+  }
+
+  type some-number = u32
+}
+```
+
+<br />
+
+Import the types above within the same package like this:
+
+```ts
+package local:example
+
+interface another-interface {
+  use my-types.{a-record, another-record, some-number}
+}
+```
+
+<br />
+
+Import the same types into a file belonging to another package by adding the package ID to the use statement:
+
+```ts
+package local:another-example
+
+interface another-interface {
+  use local:example/my-types.{a-record, another-record, some-number}
+}
+```
+
+<br />
+
+The examples above include [interface](#wit-interfaces) definitions. Keep reading for more information about these interfaces.
+
+<br />
+
+<br />
+
+---
+
+<br />
+
+## **WIT interfaces**
+
+<br />
+
+WIT is built around the _interface_ format, and interface definitions sit at the top level of WebAssembly components. interface is a collection of functions and types. WIT interfaces make Wasm code available to external code, and work much as a more traditional instance of a Wasm module.
+
+A WIT interface can be seen as a collection of functions, types and use statements. Like a Wasm module, a WIT interface defines exports and imports.
+
+<br />
+
+A WIT interface can be defined as:
+
+```ts
+interface my-interface {
+  // interface contents
+}
+```
+
+<br />
+
+Key features of WIT interfaces:
+
+- functions
+- resources
+- [types](#wit-types)
+
+<br />
+
+<br />
+
+### **WIT functions**
+
+<br />
+
+In WIT, a function can be defined as:
+
+```ts
+my-function: func(param: string)
+```
+
+<br />
+
+When examining this statement, we find that a function declaration starts off with a label, or _name_:
+
+```ts
+my-function:
+```
+
+<br />
+
+After the label, we have the definition of the function itself. It starts off with the keyword `func`, for "function", and then gets to the definition of parameters:
+
+```ts
+func(param: string)
+```
+
+<br />
+
+Note that parameters are typed, and that the typing used can be either pre-defined types, like _string_ in the example above, or user-defined types.
+
+<br />
+
+<br />
+
+### **WIT resources**
+
+A WIT _resource_ is defined as an entity with a limited lifetime that can only be passed indirectly via handle values. The abstract resource type is used in interfaces for items that shouldn't be copied by value. In WIT, resource statements can look something like:
+
+```ts
+resource my-resource
+```
+
+<br />
+
+But a resource definition can also have a body, which enables statements like:
+
+```ts
+resource my-resource {
+  constructor(init: u32)          // 0-1 constructors per resource
+  some-function: func(param: u32) // a resource definition can contain function definitions
+}
+```
+
+<br />
+
+<br />
+
+### **WIT worlds**
+
+<br />
+
+A WIT world can be said to describe the _type_ of a component, and it sits at the top level of a WebAssembly component. Worlds describe components, and define named imports and exports. Worlds can be structured as either component interfaces, or functions.
+
+<br />
+
+A WIT world can be defined as:
+
+```ts
+world my-world {
+  import local:example/my-types
+  export local:example/my-types
+}
+```
